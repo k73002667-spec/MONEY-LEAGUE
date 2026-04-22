@@ -26,6 +26,8 @@ export default function App() {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [leagueInfo, setLeagueInfo] = useState<LeagueInfo>(INITIAL_LEAGUE_INFO);
 
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   // Load from LocalStorage
   useEffect(() => {
     const savedNews = localStorage.getItem("money_league_news");
@@ -64,13 +66,13 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-primary flex flex-col">
+    <div className="min-h-screen bg-primary flex flex-col overflow-x-hidden">
       {/* Navigation */}
       <nav className="sticky top-0 z-50 glass border-b border-white/5">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div 
             className="flex items-center gap-3 cursor-pointer group"
-            onClick={() => setActiveTab("home")}
+            onClick={() => { setActiveTab("home"); setIsMenuOpen(false); }}
           >
             <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center group-hover:rotate-12 transition-transform">
               <Trophy className="text-primary size-6" />
@@ -80,7 +82,7 @@ export default function App() {
             </span>
           </div>
 
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden lg:flex items-center gap-8">
             {[
               { id: "home", label: "HOME" },
               { id: "league", label: "APPLY" },
@@ -109,8 +111,8 @@ export default function App() {
             >
               <Settings className="size-5" />
             </button>
-            <div className="h-6 w-px bg-white/10 mx-2" />
-            <div className="flex items-center gap-3">
+            <div className="h-6 w-px bg-white/10 mx-2 hidden sm:block" />
+            <div className="hidden sm:flex items-center gap-3">
               <a href={SITE_CONFIG.youtubeUrl} target="_blank" rel="noreferrer" className="text-white/50 hover:text-white transition-colors">
                 <Youtube className="size-5" />
               </a>
@@ -118,8 +120,54 @@ export default function App() {
                 <Instagram className="size-5" />
               </a>
             </div>
+            <button 
+              className="lg:hidden p-2 text-white/50 hover:text-white transition-colors"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              <Plus className={`size-6 transition-transform ${isMenuOpen ? "rotate-45" : ""}`} />
+            </button>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="lg:hidden bg-primary border-b border-white/5 overflow-hidden"
+            >
+              <div className="px-6 py-8 flex flex-col gap-6">
+                {[
+                  { id: "home", label: "HOME" },
+                  { id: "league", label: "APPLY" },
+                  { id: "match", label: "MATCH" },
+                  { id: "history", label: "HISTORY" },
+                  { id: "news", label: "NEWS" },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => { setActiveTab(tab.id); setIsMenuOpen(false); }}
+                    className={`text-2xl font-black uppercase tracking-tighter text-left transition-colors ${
+                      activeTab === tab.id ? "text-white" : "text-white/30"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+                <div className="pt-6 border-t border-white/5 flex gap-6">
+                  <a href={SITE_CONFIG.youtubeUrl} target="_blank" rel="noreferrer" className="text-white/50 hover:text-white transition-colors">
+                    <Youtube className="size-6" />
+                  </a>
+                  <a href={SITE_CONFIG.instagramUrl} target="_blank" rel="noreferrer" className="text-white/50 hover:text-white transition-colors">
+                    <Instagram className="size-6" />
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
 
       {/* Main Content */}
@@ -186,7 +234,7 @@ function Home({ setActiveTab, recentNews }: { key?: string; setActiveTab: (t: st
       className="flex flex-col"
     >
       {/* Hero Section */}
-      <section className="relative h-[80vh] flex items-center justify-center overflow-hidden border-b border-white/5">
+      <section className="relative min-h-[85vh] lg:h-[80vh] flex items-center justify-center overflow-hidden border-b border-white/5 py-20 lg:py-0">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-b from-primary/20 via-primary/80 to-primary z-10" />
           <img 
@@ -196,14 +244,14 @@ function Home({ setActiveTab, recentNews }: { key?: string; setActiveTab: (t: st
           />
         </div>
 
-        <div className="relative z-20 max-w-5xl mx-auto px-6 text-center">
+        <div className="relative z-20 max-w-5xl mx-auto px-6 text-center flex flex-col items-center">
           <motion.div
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
             className="flex justify-center mb-6"
           >
-            <span className="px-4 py-1.5 rounded-full border border-white/20 bg-white/5 text-xs font-semibold uppercase tracking-[0.2em] backdrop-blur-md">
+            <span className="px-4 py-1.5 rounded-full border border-white/20 bg-white/5 text-[10px] md:text-xs font-semibold uppercase tracking-[0.2em] backdrop-blur-md">
               FC MOBILE 공식 리그 전용 플랫폼
             </span>
           </motion.div>
@@ -212,7 +260,7 @@ function Home({ setActiveTab, recentNews }: { key?: string; setActiveTab: (t: st
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="text-6xl md:text-8xl font-black mb-8 leading-[0.9] tracking-tighter uppercase"
+            className="text-5xl md:text-8xl font-black mb-8 leading-[0.9] tracking-tighter uppercase"
           >
             Money <span className="text-white/20">League</span>
           </motion.h1>
@@ -221,9 +269,9 @@ function Home({ setActiveTab, recentNews }: { key?: string; setActiveTab: (t: st
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.4 }}
-            className="text-lg md:text-xl text-white/70 max-w-2xl mx-auto mb-10 leading-relaxed font-light"
+            className="text-base md:text-xl text-white/70 max-w-2xl mx-auto mb-10 leading-relaxed font-light"
           >
-            FC MOBILE 최고의 실력자들이 모여 보상을 쟁취하는 공간. <br/>
+            FC MOBILE 최고의 실력자들이 모여 보상을 쟁취하는 공간. <br className="hidden md:block" />
             당신의 전술과 컨트롤로 무대를 정복하세요!
           </motion.p>
           
@@ -231,7 +279,7 @@ function Home({ setActiveTab, recentNews }: { key?: string; setActiveTab: (t: st
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20"
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20 w-full max-w-md md:max-w-none"
           >
             <a 
               href={SITE_CONFIG.kakaoUrl}
@@ -243,7 +291,7 @@ function Home({ setActiveTab, recentNews }: { key?: string; setActiveTab: (t: st
             </a>
             <button 
               onClick={() => setActiveTab("news")}
-              className="w-full sm:w-auto px-10 py-5 bg-white/5 border border-white/10 text-white font-bold uppercase tracking-widest text-sm hover:bg-white/10 transition-all"
+              className="w-full sm:w-auto px-10 py-5 bg-white/5 border border-white/10 text-white font-bold uppercase tracking-widest text-sm hover:bg-white/10 transition-all font-bold"
             >
               최신 소식 보기
             </button>
@@ -254,10 +302,10 @@ function Home({ setActiveTab, recentNews }: { key?: string; setActiveTab: (t: st
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7 }}
-            className="pt-10 border-t border-white/5 w-full"
+            className="pt-10 border-t border-white/5 w-full flex flex-col items-center"
           >
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 block mb-8">Official Sponsors</span>
-            <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-8 opacity-40 hover:opacity-100 transition-opacity">
+            <div className="flex flex-wrap items-center justify-center gap-x-8 lg:gap-x-12 gap-y-6 opacity-40 hover:opacity-100 transition-opacity">
               {[
                 { name: "NEXON", icon: Gamepad2 },
                 { name: "영미터", icon: Trophy },
@@ -265,11 +313,11 @@ function Home({ setActiveTab, recentNews }: { key?: string; setActiveTab: (t: st
                 { name: "SODA", icon: CheckCircle2 },
                 { name: "청춘갈비", icon: Trophy },
               ].map((sponsor, i) => (
-                <div key={i} className="flex items-center gap-3 grayscale hover:grayscale-0 transition-all duration-500">
-                  <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
-                    <sponsor.icon className="size-4 text-white" />
+                <div key={i} className="flex items-center gap-2 lg:gap-3 grayscale hover:grayscale-0 transition-all duration-500">
+                  <div className="w-7 h-7 lg:w-8 lg:h-8 rounded-full bg-white/10 flex items-center justify-center">
+                    <sponsor.icon className="size-3 lg:size-4 text-white" />
                   </div>
-                  <span className="text-sm font-bold uppercase tracking-tighter whitespace-nowrap">{sponsor.name}</span>
+                  <span className="text-xs lg:text-sm font-bold uppercase tracking-tighter whitespace-nowrap">{sponsor.name}</span>
                 </div>
               ))}
             </div>
@@ -356,9 +404,9 @@ function MatchSection({ key }: { key?: string }) {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="glass p-8 flex flex-col items-center">
+          <div key={i} className="glass p-6 md:p-8 flex flex-col items-center">
             <div className="flex items-center justify-between w-full mb-8">
               <span className="text-[10px] font-bold uppercase tracking-widest text-white/30 truncate">MONEY LEAGUE S1</span>
               <span className="text-[10px] font-bold uppercase px-2 py-1 bg-white/10 rounded">LIVE</span>
@@ -430,30 +478,30 @@ function HistorySection({ key }: { key?: string }) {
         </p>
       </div>
 
-      <div className="space-y-16">
+      <div className="space-y-12 md:space-y-16">
         {SEASONS.map((season, i) => (
-          <div key={i} className="relative pl-12 border-l border-white/10">
+          <div key={i} className="relative pl-8 md:pl-12 border-l border-white/10">
             <div className="absolute top-0 left-[-5px] w-2 h-2 bg-white rounded-full" />
-            <h3 className="text-2xl font-black mb-6 italic text-white/20 uppercase tracking-widest">{season.title}</h3>
-            <div className="glass p-10 flex flex-col md:flex-row items-center gap-10 hover:bg-white/[0.02] transition-colors relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
+            <h3 className="text-xl md:text-2xl font-black mb-6 italic text-white/20 uppercase tracking-widest">{season.title}</h3>
+            <div className="glass p-6 md:p-10 flex flex-col md:flex-row items-center gap-8 md:gap-10 hover:bg-white/[0.02] transition-colors relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity hidden sm:block">
                 <Trophy size={120} />
               </div>
               
-              <div className="flex flex-col items-center md:items-start gap-4">
-                <div className="w-20 h-20 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10">
-                   <Trophy className="size-10 text-yellow-500" />
+              <div className="flex flex-col items-center md:items-start gap-4 shrink-0">
+                <div className="w-16 h-16 md:w-20 md:h-20 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10">
+                   <Trophy className="size-8 md:size-10 text-yellow-500" />
                 </div>
               </div>
 
-              <div className="flex-grow text-center md:text-left">
+              <div className="flex-grow text-center md:text-left overflow-hidden">
                 <div className="mb-4">
                   <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 block mb-1">Champion</span>
-                  <h4 className="text-4xl md:text-5xl font-black text-white tracking-tight">{season.winner}</h4>
+                  <h4 className="text-3xl md:text-5xl font-black text-white tracking-tight truncate">{season.winner}</h4>
                 </div>
                 <div className="pt-4 border-t border-white/5">
                    <span className="text-[10px] font-bold uppercase tracking-widest text-white/20 block mb-2">Team Members</span>
-                   <p className="text-lg text-white font-medium leading-relaxed max-w-2xl">
+                   <p className="text-base md:text-lg text-white font-medium leading-relaxed max-w-2xl break-words">
                      {season.members}
                    </p>
                 </div>
@@ -486,7 +534,7 @@ function LeagueInformation({ info }: { key?: string; info: LeagueInfo }) {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
         <div className="space-y-12">
           <section>
             <h3 className="flex items-center gap-3 text-xl font-bold mb-8 uppercase tracking-widest">
@@ -497,7 +545,7 @@ function LeagueInformation({ info }: { key?: string; info: LeagueInfo }) {
               {info.rules.map((rule, i) => (
                 <div key={i} className="flex gap-4 p-4 glass hover:bg-white/5 transition-colors group">
                   <span className="font-mono text-xs opacity-20 group-hover:opacity-100 transition-opacity">0{i+1}</span>
-                  <p className="text-sm text-white/70 leading-relaxed">{rule}</p>
+                  <p className="text-sm text-white/70 leading-relaxed break-words">{rule}</p>
                 </div>
               ))}
             </div>
@@ -505,27 +553,27 @@ function LeagueInformation({ info }: { key?: string; info: LeagueInfo }) {
         </div>
 
         <div className="space-y-12">
-          <section className="glass p-10 relative overflow-hidden">
+          <section className="glass p-6 md:p-10 relative overflow-hidden">
              {/* Decorative element */}
-            <div className="absolute -top-10 -right-10 opacity-5 rotate-12">
+            <div className="absolute -top-10 -right-10 opacity-5 rotate-12 hidden sm:block">
               <Trophy size={200} strokeWidth={1} />
             </div>
             
-            <h3 className="flex items-center gap-3 text-xl font-bold mb-8 uppercase tracking-widest">
+            <h3 className="flex items-center gap-3 text-xl font-bold mb-8 uppercase tracking-widest relative z-10">
               <Trophy className="size-6" />
               상금 규모
             </h3>
-            <p className="text-2xl font-black text-white mb-4 leading-tight">
+            <p className="text-2xl font-black text-white mb-4 leading-tight relative z-10 break-words">
               {info.prizeMoney}
             </p>
           </section>
 
-          <section className="border-l-4 border-white/20 pl-8 py-4">
+          <section className="border-l-4 border-white/20 pl-6 md:pl-8 py-4">
             <h3 className="flex items-center gap-3 text-xl font-bold mb-8 uppercase tracking-widest">
               <Gamepad2 className="size-6" />
               참가 방법
             </h3>
-            <p className="text-sm text-white/70 leading-relaxed mb-6">
+            <p className="text-sm text-white/70 leading-relaxed mb-6 break-words">
               {info.joinMethod}
             </p>
             <div className="flex gap-3">
@@ -556,14 +604,14 @@ function NewsSection({ news }: { key?: string; news: NewsItem[] }) {
       exit={{ opacity: 0, y: -20 }}
       className="max-w-5xl mx-auto py-24 px-6"
     >
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-16">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 mb-16 px-2">
         <div>
-          <h1 className="text-5xl font-black mb-4 tracking-tighter uppercase">Board <span className="text-white/20">News</span></h1>
-          <p className="text-white/50">공지사항 및 최신 소통 창구입니다.</p>
+          <h1 className="text-5xl font-black mb-4 tracking-tighter uppercase leading-none">Board <br className="sm:hidden" /><span className="text-white/20">News</span></h1>
+          <p className="text-white/50 text-sm md:text-base">공지사항 및 최신 소통 창구입니다.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {["전체", "공지", "뉴스", "가이드"].map(cat => (
-            <button key={cat} className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest border border-white/10 hover:bg-white hover:text-black transition-colors rounded-sm">
+            <button key={cat} className="px-3 md:px-4 py-2 text-[9px] md:text-[10px] font-bold uppercase tracking-widest border border-white/10 hover:bg-white hover:text-black transition-colors rounded-sm sm:flex-shrink-0">
               {cat}
             </button>
           ))}
